@@ -1,2 +1,1 @@
 # annboard-web
-DIPLOM)
