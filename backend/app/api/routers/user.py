@@ -10,14 +10,14 @@ from app.core.exceptions import *
 from app.core.s3 import s3_client
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-@router.post("/creat22e", status_code=status.HTTP_201_CREATED, response_model=User)
-async def create_user_with_role(
-    payload: UserCreate, db_session: AsyncSession = Depends(get_db)
-):
-    crud = UserCRUD(db_session)
-    db_user = await crud.create_user(payload)
-    return db_user
+#
+# @router.post("/creat22e", status_code=status.HTTP_201_CREATED, response_model=User)
+# async def create_user_with_role(
+#     payload: UserCreate, db_session: AsyncSession = Depends(get_db)
+# ):
+#     crud = UserCRUD(db_session)
+#     db_user = await crud.create_user(payload)
+#     return db_user
 
 @router.get("/me", response_model=UserMe)
 async def read_current_user(current_user: User = Depends(get_current_user)):

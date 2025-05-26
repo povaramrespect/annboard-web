@@ -38,8 +38,9 @@ class AdvertisementCRUD:
             select(Advertisement)
             .where(Advertisement.id == ad_id)
             .options(
-                selectinload(Advertisement.owner),
-                selectinload(Advertisement.category),
+                selectinload(Advertisement.images),
+                selectinload(Advertisement.owner).selectinload(User.profile_img),
+                selectinload(Advertisement.category).selectinload(Category.parents),
                 selectinload(Advertisement.values).selectinload(Value.property)
             )
         )
@@ -48,28 +49,7 @@ class AdvertisementCRUD:
         if not ad:
             raise NotFoundHTTPException(msg="Advertisement not found")
 
-        category_crud = CategoryCRUD(self.db)
-        parents = await category_crud.get_category_parents(ad.category)
-
-        category_data = ad.category.model_dump()
-        category_data["parents"] = [CategoryPublic(**p.model_dump()) for p in parents]
-
-        category_with_parents = CategoryPublic(**category_data)
-
-        ad_public = AdvertisementPublic(
-            id=ad.id,
-            title=ad.title,
-            description=ad.description,
-            price=ad.price,
-            is_price_negotiable=ad.is_price_negotiable,
-            created_at=ad.created_at,
-            updated_at=ad.updated_at,
-            owner=ad.owner,
-            categories=category_with_parents,
-            values=ad.values,
-        )
-        print(category_with_parents)
-        return ad_public
+        return ad
 
     async def get_list_preview(
             self,
@@ -77,8 +57,16 @@ class AdvertisementCRUD:
             limit: int = 100,
             search: Optional[str] = None,
     ):
-        query = select(Advertisement).offset(offset).limit(limit)
+        query = (select(Advertisement)
+                 .options(
+                    selectinload(Advertisement.category).selectinload(Category.parents),
+                    selectinload(Advertisement.owner).selectinload(User.profile_img),
+                    selectinload(Advertisement.images),
+                )
+                 .offset(offset)
+                 .limit(limit))
         result = await self.db.execute(query)
+        print("assd")
         rows = result.scalars().all()
 
         return rows
@@ -132,10 +120,6 @@ class AdvertisementCRUD:
         image = Image(url=file_url, advertisement_id=ad_id)
 
         self.db.add(image)
-        try:
-            await self.db.commit()
-            await self.db.refresh(image)
-            return image
-        except Exception:
-            await self.db.rollback()
-            raise InternalServerError(msg="Failed to add image to advertisement")
+        await self.db.commit()
+        await self.db.refresh(image)
+        return image

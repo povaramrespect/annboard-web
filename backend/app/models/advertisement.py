@@ -40,10 +40,10 @@ class Advertisement(AdvertisementBase, table=True):
         )
     )
 
-    images: list["Image"] = Relationship(back_populates="advertisement", sa_relationship_kwargs={"lazy": "selectin"})
-    owner: "User" = Relationship(back_populates="advertisements", sa_relationship_kwargs={"lazy": "selectin"})
-    category: "Category" = Relationship(back_populates="advertisements", sa_relationship_kwargs={"lazy": "selectin"})
-    values: List["Value"] = Relationship(back_populates="advertisement", sa_relationship_kwargs={"lazy": "selectin"})
+    images: list["Image"] = Relationship(back_populates="advertisement")
+    owner: "User" = Relationship(back_populates="advertisements")
+    category: "Category" = Relationship(back_populates="advertisements")
+    values: List["Value"] = Relationship(back_populates="advertisement")
 
 
 class Value(SQLModel, table=True):
@@ -69,8 +69,8 @@ class Value(SQLModel, table=True):
 
     value: str
 
-    advertisement: "Advertisement" = Relationship(back_populates="values", sa_relationship_kwargs={"lazy": "selectin"})
-    property: "Property" = Relationship(back_populates="values", sa_relationship_kwargs={"lazy": "selectin"})
+    advertisement: "Advertisement" = Relationship(back_populates="values")
+    property: "Property" = Relationship(back_populates="values")
 
 
 class ValueCreate(SQLModel):
@@ -100,9 +100,9 @@ class AdvertisementPublic(AdvertisementBase):
     id: UUID
     created_at: datetime
     updated_at: datetime | None
-    owner: "UserPublic"
+    owner: UserPublic
     is_price_negotiable: bool
-    categories: "CategoryPublic"
+    categories: CategoryPublic
     values: list["ValuePublic"] | None = None
 
 class AdvertisementCreate(AdvertisementBase):
@@ -114,8 +114,10 @@ class AdvertisementPreview(SQLModel):
     id: UUID
     title: str
     price: Decimal | None
-    owner: "UserPreview"
+    category: CategoryPublic
+    owner: UserPreview
     created_at: datetime
+    images: list[Image] | None
 
 
 class ListAdvertisementsPreview(SQLModel):

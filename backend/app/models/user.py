@@ -53,12 +53,9 @@ class User(UserBase, table=True):
         )
     )
     avatar_url: str = Field(nullable=True)
-    advertisements: list["Advertisement"] = Relationship(
-        back_populates="owner",
-        sa_relationship_kwargs={"lazy": "selectin"}
-    )
+    advertisements: list["Advertisement"] = Relationship(back_populates="owner")
 
-    profile_img: "Image" = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
+    profile_img: "Image" = Relationship(back_populates="user") #, sa_relationship_kwargs={"lazy": "selectin"}
 
 class UserPublic(UserBase):
     id: UUID
@@ -71,7 +68,7 @@ class UserLogin(UserBase):
 
 
 class UserPreview(UserBase):
-    pass
+    profile_img: "Image" | None
 
 
 class UserMe(UserPublic):

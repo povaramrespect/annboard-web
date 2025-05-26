@@ -55,17 +55,17 @@ class Category(SQLModel, table=True):
         )
     )
 
-    parent: Optional["Category"] = Relationship(
+    parents: list["Category"] = Relationship(
         back_populates="children",
-        sa_relationship_kwargs={"remote_side": "Category.id", "lazy": "selectin"},
+        sa_relationship_kwargs={"remote_side": "Category.id"},
     )
-    children: List["Category"] = Relationship(back_populates="parent", sa_relationship_kwargs={"lazy": "selectin"})
+    children: Optional[list["Category"]] = Relationship(back_populates="parents")
 
-    properties: List["Property"] = Relationship(
+    properties: list["Property"] = Relationship(
         back_populates="categories",
         link_model=CategoryPropertyLink
     )
-    advertisements: List["Advertisement"] = Relationship(back_populates="category")
+    advertisements: list["Advertisement"] = Relationship(back_populates="category")
 
 
 class Property(SQLModel, table=True):
